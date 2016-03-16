@@ -1,0 +1,62 @@
+% Cantilever beam with tip point load P, flexural rigidity EI, length l
+% y=(Pl^3)/(3EI) modeled as x=k(theta1)(theta2)
+% X as tip deflection as measurements, in mm X1,X2, ... observations
+% theta1 denote as th1 as P ~ N(10,1) kN, Bounds (9,11)kN
+% theta2 denote as th2 as (1/EI) ~ N(0.0007,0.0002) kNm2 , Bounds (0.0006,0.0008)kNm2
+% k = (1000/3) =333.3333, with l= 1m, and with adjustments in units made for y to be in mm , included
+% symbolic integration x for theta1 and y for theta2
+% nrfTHX numerator term of f theta conditioned on X ;drfTHx for denominator
+% mDx marginal distribution of theta1 ; mDy marginal distribution of theta2
+% xhat estimate of theta1; yhat estimate of theta2
+k=1000/3;muth1=10;muth2=0.0007;sigth1=1;sigth2=0.0002;th1min=9;th1max=11;th2min=0.0006;th2max=0.0008;X1=2.9202;
+muX=k*muth1*muth2;
+sig2X=k^2*((sigth1^2)*(sigth2^2)+(muth1^2)*(sigth2^2)+(sigth1^2)*(muth2^2));
+sX=sqrt(sig2X);
+mux=muth1;muy=muth2;sx=sigth1;sy=sigth2;xmin=th1min;xmax=th1max;ymin=th2min;ymax=th2max;
+syms x y
+nrfTHX=exp(-0.5*(((x-mux)/sx)^2+((y-muy)/sy)^2+((X1-k*x*y)/sX)^2);
+nrfTHXh=@(x,y) exp(-0.5.*(((x-mux)./sx).^2+((y-muy)./sy).^2+((X1-k*x.*y)./sX).^2);
+drfTHX=integral2(nrfTHXh,xmin,xmax,ymin,ymax);
+d=1/drfTHX;
+fTHX=d*nrfTHX;
+mDx=int(fTHX,y,ymin,ymax);
+mDy=int(fTHX,x,xmin,xmax);
+xhati=int(x*mDx,x,xmin,xmax);
+xhat=vpa(xhati,5);
+yhati=int(y*mDy,y,ymin,ymax);
+yhat=vpa(yhati,5);
+th1hat=xhat;th2hat=yhat;
+xMSEi=int((x-xhat)^2*mDx,x,xmin,xmax);
+xMSE=vpa(xMSEi,5);
+yMSEi=int((y-yhat)^2*mDy,y,ymin,ymax);
+yMSE=vpa(yMSEi,5);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Implemented code lines inMATLAB ie as MATLAB read it
+%-0.5/(0.0002*0.0002)=-12500000
+%0.5/(0.7094*0.7094) = 0.9935
+%xhat commands
+int(exp(-12500000*(y-0.0007)^2-0.9935*(2.9202-333.3333*x*y)^2),y,0.0006,0.0008)
+x*exp(-0.5*(x-10.0)^2)*ans
+int(ans,x,9.0,11.0);
+vpa(ans,5);
+xhat=ans*4364.5;
+%yhat commands
+int(exp(-0.5*(x-10)^2-0.9935*(2.9202-333.3333*x*y)^2),x,9.0,11.0)
+y*exp(-12500000*(y-0.0007)^2)*ans;
+int(ans,y,0.0006,0.0008);
+vpa(ans,5);
+yhat=ans*4364.5;
+%xMSE commands
+int(exp(-12500000*(y-0.0007)^2-0.9935*(2.9202-333.3333*x*y)^2),y,0.0006,0.0008);
+((x-10.072)^2)*exp(-0.5*(x-10)^2)*ans;
+int(ans,x,9,11);
+vpa(ans,5);
+xMSE=ans*4364.5;
+%yMSE commands
+int(exp(-0.5*(x-10)^2-0.9935*(2.9202-333.3333*x*y)^2),x,9.0,11.0);
+((y-0.00071167)^2)*exp(-12500000*(y-0.0007)^2)*ans;
+int(ans,y,0.0006,0.0008);
+vpa(ans,5);
+yMSE=ans*4364.5;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

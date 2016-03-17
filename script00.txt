@@ -60,3 +60,55 @@ int(ans,y,0.0006,0.0008);
 vpa(ans,5);
 yMSE=ans*4364.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% integrals evaluated by HDMR 1st order expansion
+% reference point around mean (x,y) ~ (10,0.0007)
+% Evaluate the double integral denomenator of f theta conditioned on X
+Ig=exp(-0.5*((x-10.0)^2+((2.9202-0.2333*x)/0.7095)^2))+exp(-0.5*(((y-0.0007)/0.0002)^2+((2.9202-3333.3333*y)/0.7095)^2))-0.7103;
+int(Ig,x,9,11);
+int(ans,y,0.0006,0.0008);
+dh=1/ans;
+
+% Evaluate f theta1 conditioned on X and theta1hat
+%fth1X=dh*int(Ig,y,0.0006,0.0008);
+int(Ig,y,0.0006,0.0008)
+vpa(int(x*ans,x,9.0,11.0),5);
+xhath=dh*ans;
+
+% Evaluate f theta2 conditioned on X and theta2hat
+%fth2X=dh*int(Ig,x,9.0,11.0);
+int(Ig,x,9.0,11.0);
+vpa(int(y*ans,y,0.0006,0.0008),5);
+yhath=dh*ans;
+
+% MSE for theta1hath
+int(Ig,y,0.0006,0.0008);
+vpa(int(((x-10.0827)^2)*ans,x,9.0,11.0),5);
+xMSEh=dh*ans;
+sqrt(ans)
+
+% MSE for theta2hath
+int(Ig,x,9.0,11.0); 
+vpa(int(((y-0.0007143)^2)*ans,y,0.0006,0.0008),5);
+yMSEh=dh*ans;
+sqrt(ans);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% integrals evaluated by HDMR 1st order expansion Lagrange interpolation
+nt=5;xmin=9.0;xmax=11.0;ymin=0.0006;ymax=0.0008;c=[10;0.0007];
+xvec=SampOintGenrtr(xmax,xmin,nt);
+yvec=SampOintGenrtr(ymax,ymin,nt);
+syms x y
+g0=gxEval(c);%=0.7103
+PHI1=LagrangeInterpolator(xvec,nt,x);
+PHI2=LagrangeInterpolator(yvec,nt,y);
+g11=Evalgx1var( xvec,c,nt,1,2); %  p=1,variable 1. nv=2, no. of variables  
+g12=Evalgx1var( yvec,c,nt,2,2); %  p=2,variable 2. nv=2, no. of variables 
+Ih1=sum(g11.*PHI1)+sum(g12.*PHI2)-0.7103;
+fth1x=int(Ih1,y,0.0006,0.0008);
+fth2x=int(Ih1,x,9.0,11.0);
+xhat=d*vpa(int(x*fth1x,x,9.0,11.0),5);
+yhat=d*vpa(int(y*fth2x,y,0.0006,0.0008),5);
+xMSE=d*vpa(int((x-xhat)^2*fth1x,x,9.0,11.0),5);
+yMSE=d*vpa(int((y-yhat)^2*fth2x,y,0.0006,0.0008),5);
+xsd=sqrt(xMSE);ysd=sqrt(yMSE);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
